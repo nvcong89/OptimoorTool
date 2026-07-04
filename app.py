@@ -59,6 +59,11 @@ def ensure_task_directories() -> None:
         path.mkdir(parents=True, exist_ok=True)
 
 
+def is_local_environment() -> bool:
+    """Check if running locally vs Streamlit Cloud."""
+    return os.getenv('STREAMLIT_CLOUD') is None
+
+
 def open_path(path: Path) -> None:
     if not path.exists():
         raise FileNotFoundError(f"Không tìm thấy đường dẫn: {path}")
@@ -448,13 +453,23 @@ def main():
     st.sidebar.markdown("---")
 
     if GUIDE_FILE_PATH.exists():
-        if st.sidebar.button("📘 Open user guide", use_container_width=True):
-            try:
-                open_path(GUIDE_FILE_PATH)
-                st.sidebar.success("Đã mở hướng dẫn sử dụng.")
-            except Exception as e:
-                st.sidebar.warning(f"Không mở được hướng dẫn tự động: {e}")
-                st.sidebar.code(str(GUIDE_FILE_PATH))
+        if is_local_environment():
+            if st.sidebar.button("📘 Open user guide", use_container_width=True):
+                try:
+                    open_path(GUIDE_FILE_PATH)
+                    st.sidebar.success("Đã mở hướng dẫn sử dụng.")
+                except Exception as e:
+                    st.sidebar.warning(f"Không mở được hướng dẫn tự động: {e}")
+                    st.sidebar.code(str(GUIDE_FILE_PATH))
+        else:
+            guide_bytes = GUIDE_FILE_PATH.read_bytes()
+            st.sidebar.download_button(
+                label="📘 Download user guide",
+                data=guide_bytes,
+                file_name=GUIDE_FILE_PATH.name,
+                mime="text/html",
+                use_container_width=True,
+            )
     else:
         st.sidebar.info("Không tìm thấy file hướng dẫn HTML.")
 
