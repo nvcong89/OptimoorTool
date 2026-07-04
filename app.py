@@ -145,13 +145,16 @@ def convert_rtf_to_excel(uploaded_rtf_files) -> list[Path]:
     
     for path in OPTI_OUTPUT_DIR.glob("*.xlsx"):
         path.unlink(missing_ok=True)
-    for path in OPTI_INPUT_DIR.glob("*.rtf"):
-        path.unlink(missing_ok=True)
+    # Clean up old files - match both .rtf and .RTF
+    for path in OPTI_INPUT_DIR.glob("*"):
+        if path.is_file() and path.suffix.lower() == '.rtf':
+            path.unlink(missing_ok=True)
 
     saved_paths = save_uploaded_files(uploaded_rtf_files, OPTI_INPUT_DIR)
     st.write(f"DEBUG: Saved paths = {saved_paths}")
     
-    rtf_files = sorted([p for p in OPTI_INPUT_DIR.glob("*.rtf") if p.is_file()])
+    # Find RTF files - case-insensitive for cross-platform compatibility
+    rtf_files = sorted([p for p in OPTI_INPUT_DIR.glob("*") if p.is_file() and p.suffix.lower() == '.rtf'])
     st.write(f"DEBUG: RTF files found = {rtf_files}")
     
     if not rtf_files:
