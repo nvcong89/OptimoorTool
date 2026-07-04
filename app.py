@@ -474,7 +474,7 @@ def main():
             else:
                 guide_bytes = GUIDE_FILE_PATH.read_bytes()
                 st.download_button(
-                    label="📥 Download",
+                    label="📥 Download user guide",
                     data=guide_bytes,
                     file_name=GUIDE_FILE_PATH.name,
                     mime="text/html",
@@ -482,7 +482,7 @@ def main():
                 )
         
         with col2:
-            if st.button("📖 View online", use_container_width=True):
+            if st.button("📖 View user guide online", use_container_width=True):
                 st.session_state["show_guide"] = not st.session_state.get("show_guide", False)
     else:
         st.sidebar.info("Không tìm thấy file hướng dẫn HTML.")
