@@ -491,8 +491,9 @@ def main():
     if st.session_state.get("show_guide", False) and GUIDE_FILE_PATH.exists():
         with st.expander("📖 User Guide - Hướng dẫn sử dụng", expanded=True):
             try:
+                # Read HTML file and display using components.html for proper rendering
                 guide_html = GUIDE_FILE_PATH.read_text(encoding='utf-8')
-                st.markdown(guide_html, unsafe_allow_html=True)
+                st.components.v1.html(guide_html, height=800, scrolling=True)
             except Exception as e:
                 st.error(f"Lỗi khi đọc file hướng dẫn: {e}")
         st.markdown("---")
