@@ -460,25 +460,42 @@ def main():
     st.sidebar.markdown("---")
 
     if GUIDE_FILE_PATH.exists():
-        if can_open_file_locally():
-            if st.sidebar.button("📘 Open user guide", use_container_width=True):
-                try:
-                    open_path(GUIDE_FILE_PATH)
-                    st.sidebar.success("Đã mở hướng dẫn sử dụng.")
-                except Exception as e:
-                    st.sidebar.warning(f"Không mở được hướng dẫn tự động: {e}")
-                    st.sidebar.code(str(GUIDE_FILE_PATH))
-        else:
-            guide_bytes = GUIDE_FILE_PATH.read_bytes()
-            st.sidebar.download_button(
-                label="📘 Download user guide",
-                data=guide_bytes,
-                file_name=GUIDE_FILE_PATH.name,
-                mime="text/html",
-                use_container_width=True,
-            )
+        col1, col2 = st.sidebar.columns(2)
+        
+        with col1:
+            if can_open_file_locally():
+                if st.button("📘 Open", use_container_width=True):
+                    try:
+                        open_path(GUIDE_FILE_PATH)
+                        st.sidebar.success("Đã mở hướng dẫn sử dụng.")
+                    except Exception as e:
+                        st.sidebar.warning(f"Không mở được hướng dẫn tự động: {e}")
+                        st.sidebar.code(str(GUIDE_FILE_PATH))
+            else:
+                guide_bytes = GUIDE_FILE_PATH.read_bytes()
+                st.download_button(
+                    label="📥 Download",
+                    data=guide_bytes,
+                    file_name=GUIDE_FILE_PATH.name,
+                    mime="text/html",
+                    use_container_width=True,
+                )
+        
+        with col2:
+            if st.button("📖 View online", use_container_width=True):
+                st.session_state["show_guide"] = not st.session_state.get("show_guide", False)
     else:
         st.sidebar.info("Không tìm thấy file hướng dẫn HTML.")
+
+    # Display guide if user clicked "View online"
+    if st.session_state.get("show_guide", False) and GUIDE_FILE_PATH.exists():
+        with st.expander("📖 User Guide - Hướng dẫn sử dụng", expanded=True):
+            try:
+                guide_html = GUIDE_FILE_PATH.read_text(encoding='utf-8')
+                st.markdown(guide_html, unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"Lỗi khi đọc file hướng dẫn: {e}")
+        st.markdown("---")
 
     if task == "Rose Chart Maker":
         st.title("🧭 Rose Chart Maker")
