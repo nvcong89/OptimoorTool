@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPTIMOOR Workflow Guidelines – Mooring Analysis</title>
+    <style>
+        :root {
+            --primary: #1a3a5c;
+            --secondary: #2e6da4;
+            --accent: #e8a020;
+            --accent2: #27ae60;
+            --accent3: #e74c3c;
+            --light-bg: #f4f7fb;
+            --card-bg: #ffffff;
+            --border: #d0dce8;
+            --text: #2c3e50;
+            --text-light: #5a6a7a;
+            --code-bg: #eef2f7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        /* ─── HEADER ─── */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px 0 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 30px,
+                rgba(255,255,255,0.02) 30px,
+                rgba(255,255,255,0.02) 60px
+            );
+        }
+
+        header .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        header p.subtitle {
+            font-size: 1rem;
+            opacity: 0.85;
+            margin-bottom: 6px;
+        }
+
+        header .meta {
+            font-size: 0.82rem;
+            opacity: 0.65;
+            margin-top: 10px;
+        }
+
+        /* ─── NAVIGATION ─── */
+        nav {
+            background: var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li a {
+            display: block;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 12px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        nav ul li a:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* ─── LAYOUT ─── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ─── WORKFLOW OVERVIEW ─── */
+        .workflow-overview {
+            background: white;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .workflow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+            margin-top: 30px;
+        }
+
+        .workflow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 140px;
+        }
+
+        .step-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .step-circle.s1 { background: linear-gradient(135deg, #3498db, #1a6fa8); }
+        .step-circle.s2 { background: linear-gradient(135deg, #27ae60, #1a7a42); }
+        .step-circle.s3 { background: linear-gradient(135deg, #e67e22, #c0580a); }
+        .step-circle.s4 { background: linear-gradient(135deg, #9b59b6, #6c3483); }
+        .step-circle.s5 { background: linear-gradient(135deg, #e74c3c, #a93226); }
+
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .step-arrow {
+            font-size: 1.4rem;
+            color: var(--border);
+            margin: 0 4px;
+            padding-bottom: 24px;
+        }
+
+        /* ─── SECTION ─── */
+        .section {
+            padding: 50px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section:nth-child(even) {
+            background: white;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .section-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .sn-blue   { background: linear-gradient(135deg, #3498db, #1a6fa8); }
+        .sn-green  { background: linear-gradient(135deg, #27ae60, #1a7a42); }
+        .sn-orange { background: linear-gradient(135deg, #e67e22, #c0580a); }
+        .sn-purple { background: linear-gradient(135deg, #9b59b6, #6c3483); }
+        .sn-red    { background: linear-gradient(135deg, #e74c3c, #a93226); }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+
+        .section-title p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* ─── CARDS ─── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .card ul li {
+            font-size: 0.875rem;
+            color: var(--text);
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .card ul li:last-child {
+            border-bottom: none;
+        }
+
+        .card ul li::before {
+            content: '▸';
+            color: var(--secondary);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ─── DATA TABLE ─── */
+        .data-table-wrap {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        thead tr {
+            background: var(--primary);
+            color: white;
+        }
+
+        thead th {
+            padding: 13px 16px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--light-bg);
+        }
+
+        tbody tr:hover {
+            background: #ddeeff;
+        }
+
+        tbody td {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        td.highlight {
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* ─── STEP BLOCKS ─── */
+        .step-block {
+            background: white;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--secondary);
+            border-radius: 0 10px 10px 0;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .step-block.orange { border-left-color: var(--accent); }
+        .step-block.green  { border-left-color: var(--accent2); }
+        .step-block.red    { border-left-color: var(--accent3); }
+        .step-block.purple { border-left-color: #9b59b6; }
+
+        .step-block h4 {
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-block p, .step-block li {
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        .step-block ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .step-block ul li {
+            margin-bottom: 5px;
+        }
+
+        /* ─── PARAMETER BOX ─── */
+        .param-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .param-box .param-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dashed #c8d4e0;
+        }
+
+        .param-box .param-row:last-child {
+            border-bottom: none;
+        }
+
+        .param-key {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .param-val {
+            color: var(--accent3);
+            font-weight: 700;
+        }
+
+        /* ─── ALERT / NOTE ─── */
+        .alert {
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin: 16px 0;
+            font-size: 0.875rem;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .alert.info    { background: #e8f4fd; border-left: 4px solid #3498db; }
+        .alert.warning { background: #fef9e7; border-left: 4px solid #f39c12; }
+        .alert.success { background: #eafaf1; border-left: 4px solid #27ae60; }
+        .alert.danger  { background: #fdedec; border-left: 4px solid #e74c3c; }
+
+        .alert strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        /* ─── CHECKLIST ─── */
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin-top: 12px;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            font-size: 0.875rem;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .check-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--secondary);
+            margin-top: 1px;
+        }
+
+        /* ─── RESULT CARD ─── */
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .result-card .metric {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--secondary);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .result-card .metric.ok    { color: var(--accent2); }
+        .result-card .metric.warn  { color: var(--accent); }
+        .result-card .metric.limit { color: var(--accent3); }
+
+        .result-card .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-card .metric-desc {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        /* ─── FLOW DIAGRAM ─── */
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin: 20px 0;
+        }
+
+        .flow-item {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+        }
+
+        .flow-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .flow-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--secondary);
+            flex-shrink: 0;
+            margin-top: 18px;
+        }
+
+        .flow-line {
+            width: 2px;
+            flex: 1;
+            background: var(--border);
+            margin: 0 auto;
+        }
+
+        .flow-content {
+            flex: 1;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 6px 0 6px 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .flow-content h4 {
+            font-size: 0.95rem;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .flow-content p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        /* ─── TABS ─── */
+        .tab-container {
+            margin-top: 20px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--secondary);
+            border-bottom-color: var(--secondary);
+        }
+
+        .tab-btn:hover {
+            color: var(--secondary);
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 24px 0;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* ─── CRITERIA TABLE ─── */
+        .criteria-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .criteria-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-pass   { background: #eafaf1; color: #1e8449; }
+        .badge-limit  { background: #fef9e7; color: #b7770d; }
+        .badge-fail   { background: #fdedec; color: #c0392b; }
+
+        .criteria-text {
+            font-size: 0.875rem;
+            flex: 1;
+        }
+
+        .criteria-value {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            background: var(--primary);
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 30px;
+            font-size: 0.82rem;
+        }
+
+        footer strong {
+            color: white;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.5rem; }
+            .workflow-steps { gap: 8px; }
+            .step-arrow { display: none; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ─── PRINT ─── */
+        @media print {
+            nav, .workflow-overview { break-inside: avoid; }
+            .section { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<header>
+    <div class="container">
+        <div class="badge">Technical Workflow Guide</div>
+        <h1>🚢 OPTIMOOR Mooring Analysis</h1>
+        <p class="subtitle">Hướng dẫn quy trình làm việc với phần mềm OPTIMOOR</p>
+        <p class="subtitle">Gemalink Container Terminal Phase 2 – Upstream Quay</p>
+        <div class="meta">
+            Ref: VN3045-HAS-XX-XX-RP-CM-1130 &nbsp;|&nbsp; Prepared by: Cong Nguyen van - Haskoning Vietnam &nbsp;|&nbsp; Version: P01 &nbsp;|&nbsp; Date: 27 March 2026
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ NAVIGATION -->
+<nav>
+    <ul>
+        <li><a href="#overview">📋 Tổng quan</a></li>
+        <li><a href="#phase1">📥 Phase 1: Thu thập số liệu</a></li>
+        <li><a href="#phase2">⚙️ Phase 2: Dựng Model</a></li>
+        <li><a href="#phase3">🔄 Phase 3: Chạy phân tích</a></li>
+        <li><a href="#phase4">📊 Phase 4: Post-processing</a></li>
+        <li><a href="#criteria">✅ Tiêu chí đánh giá</a></li>
+        <li><a href="#checklist">☑️ Checklist</a></li>
+    </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ WORKFLOW OVERVIEW -->
+<div class="workflow-overview" id="overview">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-blue">📋</div>
+            <div class="section-title">
+                <h2>Tổng quan quy trình làm việc</h2>
+                <p>5 giai đoạn chính trong phân tích neo tàu bằng OPTIMOOR</p>
+            </div>
+        </div>
+
+        <div class="alert info">
+            <span class="alert-icon">ℹ️</span>
+            <div>
+                <strong>Mục tiêu phân tích</strong>
+                Phân tích lực neo tĩnh (Static Mooring Analysis) sử dụng phương pháp <strong>Elastic Analysis – Method 1</strong> theo BS 6349-4:2014 nhằm: (1) tối ưu hóa mặt bằng bố trí dây neo, (2) đảm bảo an toàn neo đậu trong điều kiện khai thác, và (3) xác định tải trọng thiết kế cho bích neo (bollard).
+            </div>
+        </div>
+
+        <div class="workflow-steps">
+            <div class="workflow-step">
+                <div class="step-circle s1">📥</div>
+                <div class="step-label">Phase 1<br>Thu thập<br>số liệu</div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="workflow-step">
+                <div class="step-circle s2">⚙️</div>
+                <div class="step-label">Phase 2<br>Dựng<br>Model</div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="workflow-step">
+                <div class="step-circle s3">🔄</div>
+                <div class="step-label">Phase 3<br>Chạy<br>phân tích</div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="workflow-step">
+                <div class="step-circle s4">📊</div>
+                <div class="step-label">Phase 4<br>Post-<br>processing</div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="workflow-step">
+                <div class="step-circle s5">📝</div>
+                <div class="step-label">Phase 5<br>Báo cáo<br>& Review</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ PHASE 1: DATA COLLECTION -->
+<section class="section" id="phase1">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-blue">1</div>
+            <div class="section-title">
+                <h2>Phase 1: Thu thập & Chuẩn bị Số liệu Đầu vào</h2>
+                <p>Input Data Collection & Preparation</p>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <!-- Vessel Data -->
+            <div class="card">
+                <div class="card-icon">🚢</div>
+                <h3>1.1 Số liệu Tàu thiết kế (Vessel Data)</h3>
+                <ul>
+                    <li>Tải trọng tàu: DWT / TEU capacity</li>
+                    <li>Chiều dài tổng thể (LOA) và LBP</li>
+                    <li>Chiều rộng tàu (Beam)</li>
+                    <li>Chiều cao tàu (Depth)</li>
+                    <li>Mớn nước lớn nhất và nhỏ nhất (Max/Min Draught)</li>
+                    <li>Diện tích chắn gió phương dọc & ngang (Windage Area – Longitudinal & Transverse)</li>
+                    <li>Số lượng tời neo (Winches fore & aft)</li>
+                    <li>Vị trí fairlead và chock trên tàu</li>
+                </ul>
+            </div>
+
+            <!-- Mooring Line Data -->
+            <div class="card">
+                <div class="card-icon">🪢</div>
+                <h3>1.2 Số liệu Dây neo (Mooring Line Data)</h3>
+                <ul>
+                    <li>Loại dây neo: Steel Wire / HMPE Trosar / HMPE Dyneema</li>
+                    <li>Tải trọng phá hủy tối thiểu – MBL (ton)</li>
+                    <li>Chiều dài đuôi dây neo – Tail length (m)</li>
+                    <li>MBL của đuôi dây neo (ton)</li>
+                    <li>Đường cong lực – độ giãn dài (Load-Elongation Curve) theo OCIMF MEG4</li>
+                    <li>Lực căng trước (Pretension) = 10% MBL</li>
+                    <li>WLL = 50% MBL (theo OCIMF MEG4 cho HMPE)</li>
+                </ul>
+            </div>
+
+            <!-- Environmental Data -->
+            <div class="card">
+                <div class="card-icon">🌊</div>
+                <h3>1.3 Điều kiện Môi trường (Environmental Conditions)</h3>
+                <ul>
+                    <li>Vận tốc gió khai thác (Operational Wind Speed)</li>
+                    <li>Hướng gió: tất cả các hướng (360°)</li>
+                    <li>Vận tốc dòng chảy và góc tác động so với tuyến bến</li>
+                    <li>Mực nước cao (HWL) và mực nước thấp (LWL)</li>
+                    <li>Chiều cao sóng khai thác (nếu có)</li>
+                    <li>Hoa hồng gió (Wind Rose) tại khu vực dự án</li>
+                </ul>
+            </div>
+
+            <!-- Berth/Jetty Data -->
+            <div class="card">
+                <div class="card-icon">🏗️</div>
+                <h3>1.4 Số liệu Bến cảng (Berth/Jetty Data)</h3>
+                <ul>
+                    <li>Mặt bằng tổng thể cầu cảng (General Arrangement)</li>
+                    <li>Cao trình đỉnh bến (Jetty Deck Level)</li>
+                    <li>Cao trình nạo vét thiết kế (Design Dredge Level)</li>
+                    <li>Hướng bến so với hướng Bắc (Berth Orientation)</li>
+                    <li>Kiểu kết cấu: Open / Solid</li>
+                    <li>Khoảng cách bích neo (Bollard Spacing)</li>
+                    <li>Vị trí tọa độ các bích neo (Bollard Coordinates)</li>
+                </ul>
+            </div>
+
+            <!-- Fender Data -->
+            <div class="card">
+                <div class="card-icon">🛡️</div>
+                <h3>1.5 Số liệu Đệm va (Fender Data)</h3>
+                <ul>
+                    <li>Loại đệm va (Fender Type): SPC Cone, Cell, etc.</li>
+                    <li>Chiều cao đệm va (Height)</li>
+                    <li>Cao trình tâm đệm va (Center Elevation)</li>
+                    <li>Năng lượng hấp thụ (Energy Absorption Capacity – kNm)</li>
+                    <li>Phản lực đệm va (Reaction Force – kN)</li>
+                    <li>Đường cong lực – biến dạng (Load-Deflection Curve)</li>
+                    <li>Khoảng cách giữa các đệm va</li>
+                </ul>
+            </div>
+
+            <!-- Standards & References -->
+            <div class="card">
+                <div class="card-icon">📚</div>
+                <h3>1.6 Tiêu chuẩn & Tài liệu tham khảo</h3>
+                <ul>
+                    <li>BS 6349-1-2:2016 – Đánh giá tải trọng</li>
+                    <li>BS 6349-4:2014 – Thiết kế hệ thống neo</li>
+                    <li>PIANC Report No. 186-2025 – Neo tàu lớn</li>
+                    <li>PIANC Report No. 115-2012 – Tiêu chí bốc dỡ container</li>
+                    <li>OCIMF MEG4 – Hướng dẫn thiết bị neo</li>
+                    <li>Basis of Design (BoD) của dự án</li>
+                    <li>Báo cáo phân tích neo giai đoạn trước (nếu có)</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Vessel Data Table -->
+        <h3 style="margin-top: 30px; color: var(--primary); font-size: 1.1rem;">📋 Bảng tổng hợp số liệu tàu thiết kế (Gemalink Phase 2)</h3>
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thông số</th>
+                        <th>14,000 TEU<br>(Initial Phase)</th>
+                        <th>24,000 TEU<br>(Final Phase)</th>
+                        <th>23,000 TEU<br>(Client Request)</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">DWT (tấn)</td>
+                        <td>150,000</td>
+                        <td>250,000</td>
+                        <td>221,000</td>
+                        <td>Xác định ngưỡng vận tốc gió</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">LOA (m)</td>
+                        <td>335</td>
+                        <td>400</td>
+                        <td>400</td>
+                        <td>Xác định chiều dài bến</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">LBP (m)</td>
+                        <td>320</td>
+                        <td>389.2</td>
+                        <td>393.9</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Beam (m)</td>
+                        <td>51</td>
+                        <td>61.4</td>
+                        <td>61.3</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Max Draught (m)</td>
+                        <td>16.0</td>
+                        <td>16.5</td>
+                        <td>16.0</td>
+                        <td>Kiểm tra với độ sâu nạo vét</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Min Draught (m)</td>
+                        <td>14.5</td>
+                        <td>15.0</td>
+                        <td>14.5</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Windage – Longitudinal (m²)</td>
+                        <td>8,620</td>
+                        <td>12,400</td>
+                        <td>11,180</td>
+                        <td>Lấy từ GA tàu hoặc database</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Windage – Transverse (m²)</td>
+                        <td>1,557</td>
+                        <td>2,292</td>
+                        <td>2,336</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Số tời (Winches fore/aft)</td>
+                        <td>8 hoặc 6</td>
+                        <td>12</td>
+                        <td>8</td>
+                        <td>Ảnh hưởng đến số lượng dây neo</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">MBL dây neo (tấn)</td>
+                        <td>119 (Steel Wire)</td>
+                        <td>153 (HMPE Trosar)</td>
+                        <td>142 (HMPE Trosar)</td>
+                        <td>Theo PIANC 186 & Client data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert warning" style="margin-top: 20px;">
+            <span class="alert-icon">⚠️</span>
+            <div>
+                <strong>Lưu ý quan trọng về Windage Area</strong>
+                Diện tích chắn gió của tàu 14,000 TEU và 23,000 TEU lấy từ database của Haskoning (tàu tương đương). Diện tích chắn gió của tàu 24,000 TEU lấy trực tiếp từ bản vẽ GA tàu "One Innovation" do Client cung cấp. Cần xác minh nguồn gốc số liệu trước khi đưa vào model.
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PHASE 2: MODEL SETUP -->
+<section class="section" id="phase2">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-green">2</div>
+            <div class="section-title">
+                <h2>Phase 2: Dựng Model trong OPTIMOOR</h2>
+                <p>Model Setup & Configuration in OPTIMOOR Software</p>
+            </div>
+        </div>
+
+        <!-- Tabs for sub-sections -->
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('tab-berth', this)">🏗️ Cấu hình Bến</button>
+                <button class="tab-btn" onclick="showTab('tab-vessel', this)">🚢 Cấu hình Tàu</button>
+                <button class="tab-btn" onclick="showTab('tab-env', this)">🌊 Môi trường</button>
+                <button class="tab-btn" onclick="showTab('tab-lines', this)">🪢 Dây neo</button>
+                <button class="tab-btn" onclick="showTab('tab-fender', this)">🛡️ Đệm va</button>
+                <button class="tab-btn" onclick="showTab('tab-scenario', this)">📋 Kịch bản</button>
+            </div>
+
+            <!-- TAB: BERTH -->
+            <div class="tab-panel active" id="tab-berth">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">⚙️ Cấu hình Bến cảng (Berth Setup)</h3>
+
+                <div class="step-block green">
+                    <h4>📐 Bước 2.1 – Định nghĩa hướng bến (Berth Orientation)</h4>
+                    <p>Nhập góc hướng bến so với hướng Bắc địa lý. Đây là thông số quan trọng để OPTIMOOR tính toán đúng hướng tác động của gió và dòng chảy.</p>
+                </div>
+
+                <div class="param-box">
+                    <div class="param-row">
+                        <span class="param-key">Berth Orientation to North</span>
+                        <span class="param-val">180°</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Structure Type</span>
+                        <span class="param-val">Open (Cầu cảng hở)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Jetty Deck Level</span>
+                        <span class="param-val">+6.0 mCD</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Design Dredge Level (Initial Phase)</span>
+                        <span class="param-val">-16.5 mCD</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Design Dredge Level (Final Phase)</span>
+                        <span class="param-val">-18.0 mCD</span>
+                    </div>
+                </div>
+
+                <div class="step-block green">
+                    <h4>📍 Bước 2.2 – Nhập tọa độ Bích neo (Bollard Positions)</h4>
+                    <ul>
+                        <li>Nhập tọa độ X, Y của từng bích neo dọc theo tuyến bến</li>
+                        <li>Khoảng cách bích neo: tại mỗi 2 nhịp dầm ngang ≈ <strong>11.5m đến 12.5m c/c</strong></li>
+                        <li>Đặt tên bích neo theo quy ước (A, B, C, ... hoặc S, T, ...) để dễ theo dõi kết quả</li>
+                        <li>Kiểm tra lại vị trí bích neo so với mặt bằng thiết kế (GA drawing)</li>
+                    </ul>
+                </div>
+
+                <div class="alert info">
+                    <span class="alert-icon">💡</span>
+                    <div>
+                        <strong>Ghi chú về Bollard Inner/Outer</strong>
+                        Đối với tàu 14,000 TEU, dây mũi và dây lái có thể buộc vào bích neo ngoài (bollard S) hoặc bích neo trong (bollard T). Cần chạy cả hai trường hợp để so sánh. Kết quả thực tế cho thấy lực căng dây neo gần như tương đương giữa hai phương án.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: VESSEL -->
+            <div class="tab-panel" id="tab-vessel">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">🚢 Cấu hình Tàu (Vessel Setup)</h3>
+
+                <div class="step-block">
+                    <h4>📏 Bước 2.3 – Nhập kích thước tàu</h4>
+                    <ul>
+                        <li>Nhập đầy đủ: LOA, LBP, Beam, Depth</li>
+                        <li>Nhập mớn nước: Max Draught và Min Draught (với full deck cargo)</li>
+                        <li>Nhập diện tích chắn gió (Windage Areas): phương dọc và phương ngang</li>
+                        <li>Xác định vị trí tâm tàu (Midship) so với mép bến</li>
+                    </ul>
+                </div>
+
+                <div class="step-block">
+                    <h4>⚓ Bước 2.4 – Định nghĩa vị trí Fairlead & Winch</h4>
+                    <ul>
+                        <li>Nhập tọa độ các fairlead (lỗ dẫn dây) trên tàu theo chiều dài tàu</li>
+                        <li>Số lượng winch fore và aft: 8 winches hoặc 6 winches (tùy option)</li>
+                        <li>Tàu 24,000 TEU: 12 winches; Tàu 23,000 TEU: 8 winches</li>
+                        <li>Tham khảo GA tàu hoặc PIANC 186 cho vị trí fairlead tiêu chuẩn</li>
+                    </ul>
+                </div>
+
+                <div class="alert warning">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>Kiểm tra Under-keel Clearance</strong>
+                        Trước khi chạy phân tích, kiểm tra khoảng cách tĩnh không dưới đáy tàu (UKC) tại mức mớn nước tối đa so với cao trình nạo vét thiết kế. Tàu 24,000 TEU: Max Draught = 16.5m, Dredge Level = -18.0mCD → UKC = 1.5m (cần kiểm tra theo tiêu chuẩn).
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: ENV -->
+            <div class="tab-panel" id="tab-env">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">🌊 Cấu hình Môi trường (Environmental Setup)</h3>
+
+                <div class="step-block orange">
+                    <h4>💨 Bước 2.5 – Cấu hình Gió (Wind)</h4>
+                    <p>Nhập vận tốc gió khai thác theo từng nhóm tàu:</p>
+                    <ul>
+                        <li><strong>Tàu DWT &gt; 200,000T</strong> (24,000 TEU): V<sub>wind</sub> = 17.1 m/s = <strong>33.2 knots</strong></li>
+                        <li><strong>Tàu DWT ≤ 200,000T</strong> (14,000 TEU, 23,000 TEU): V<sub>wind</sub> = 20.6 m/s = <strong>40.2 knots</strong></li>
+                        <li>Hướng gió: quét toàn bộ 360° (Wind Speed Sweep in All Directions)</li>
+                        <li>Đối với tàu 14,000 TEU với 6 winches: xác định V<sub>max</sub> = 17.1 m/s</li>
+                    </ul>
+                </div>
+
+                <div class="param-box">
+                    <div class="param-row">
+                        <span class="param-key">Wind speed (DWT &gt; 200,000T)</span>
+                        <span class="param-val">33.2 knots (17.1 m/s)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Wind speed (DWT ≤ 200,000T)</span>
+                        <span class="param-val">40.2 knots (20.6 m/s)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Wind direction</span>
+                        <span class="param-val">All directions (360° sweep)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Current speed</span>
+                        <span class="param-val">1.13 knots (0.58 m/s)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Current direction (to upstream quay)</span>
+                        <span class="param-val">-49° ± 5° off quay line</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Wave height</span>
+                        <span class="param-val">Bỏ qua (Minor – Ignored)</span>
+                    </div>
+                </div>
+
+                <div class="step-block orange">
+                    <h4>🌊 Bước 2.6 – Cấu hình Mực nước (Water Levels)</h4>
+                    <ul>
+                        <li>High Water Level (HWL): <strong>+3.97 mCD</strong></li>
+                        <li>Low Water Level (LWL): <strong>+0.58 mCD</strong></li>
+                        <li>Phân tích được thực hiện ở cả HWL và LWL</li>
+                        <li>Kết hợp với mớn nước Max và Min → 4 tổ hợp mực nước/mớn nước</li>
+                    </ul>
+                </div>
+
+                <div class="alert info">
+                    <span class="alert-icon">💡</span>
+                    <div>
+                        <strong>Phương pháp bảo thủ (Conservative Approach)</strong>
+                        Việc xét gió theo tất cả các hướng kết hợp với dòng chảy 49° so với tuyến bến là phương pháp thận trọng. Thực tế theo hoa hồng gió tại Vũng Tàu, hướng gió thịnh hành gần như vuông góc với hướng dòng chảy, nên tổ hợp bất lợi nhất ít khi xảy ra đồng thời.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: LINES -->
+            <div class="tab-panel" id="tab-lines">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">🪢 Cấu hình Dây neo (Mooring Lines)</h3>
+
+                <div class="step-block purple">
+                    <h4>🔧 Bước 2.7 – Nhập đặc tính dây neo</h4>
+                    <ul>
+                        <li>Chọn loại dây neo phù hợp với từng tàu</li>
+                        <li>Nhập MBL và đường cong lực-giãn dài (Load-Elongation Curve) theo OCIMF MEG4</li>
+                        <li>Nhập chiều dài đuôi dây neo (Tail Length = 11.0m cho tất cả)</li>
+                        <li>Đặt lực căng trước (Pretension) = <strong>10% MBL</strong></li>
+                        <li>Đặt WLL = <strong>50% MBL</strong> làm ngưỡng kiểm tra</li>
+                    </ul>
+                </div>
+
+                <div class="data-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tàu</th>
+                                <th>Loại dây neo</th>
+                                <th>MBL (tấn)</th>
+                                <th>WLL = 50% MBL (tấn)</th>
+                                <th>Pretension = 10% MBL (tấn)</th>
+                                <th>Tail MBL (tấn)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="highlight">14,000 TEU</td>
+                                <td>Steel Wire</td>
+                                <td>119</td>
+                                <td>65.5</td>
+                                <td>11.9</td>
+                                <td>140</td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">24,000 TEU</td>
+                                <td>HMPE Dyneema</td>
+                                <td>153</td>
+                                <td>76.5</td>
+                                <td>15.3</td>
+                                <td>204</td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">23,000 TEU</td>
+                                <td>HMPE Trosar</td>
+                                <td>142</td>
+                                <td>71.0</td>
+                                <td>14.2</td>
+                                <td>184</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="step-block purple">
+                    <h4>📐 Bước 2.8 – Bố trí dây neo (Mooring Arrangement)</h4>
+                    <p>Phân loại dây neo theo chức năng:</p>
+                    <ul>
+                        <li><strong>Head Lines (HL)</strong>: Dây neo mũi – chống lực dọc hướng lái</li>
+                        <li><strong>Stern Lines (SL)</strong>: Dây neo lái – chống lực dọc hướng mũi</li>
+                        <li><strong>Breast Lines (BL)</strong>: Dây neo hông – chống lực ngang (off-berth)</li>
+                        <li><strong>Spring Lines (SP)</strong>: Dây neo giằng – chống lực dọc (fore/aft)</li>
+                    </ul>
+                </div>
+
+                <div class="data-table-wrap" style="margin-top: 16px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tàu</th>
+                                <th>Head Lines</th>
+                                <th>Stern Lines</th>
+                                <th>Fore Breast</th>
+                                <th>Aft Breast</th>
+                                <th>Fore Spring</th>
+                                <th>Aft Spring</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="highlight">14,000 TEU (8 winches)</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td><strong>16</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">14,000 TEU (6 winches)</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td><strong>12</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">24,000 TEU</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td>5</td>
+                                <td>5</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td><strong>18</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">23,000 TEU</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>3</td>
+                                <td>2</td>
+                                <td>2</td>
+                                <td><strong>16</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB: FENDER -->
+            <div class="tab-panel" id="tab-fender">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">🛡️ Cấu hình Đệm va (Fender Setup)</h3>
+
+                <div class="step-block green">
+                    <h4>🔧 Bước 2.9 – Nhập thông số đệm va vào OPTIMOOR</h4>
+                    <ul>
+                        <li>Chọn loại đệm va: <strong>SPC 1800H G2.61</strong> (Cone Fender)</li>
+                        <li>Nhập chiều cao đệm va: <strong>1.8m</strong></li>
+                        <li>Nhập cao trình tâm đệm va: <strong>+3.0 mCD</strong></li>
+                        <li>Nhập năng lượng hấp thụ: <strong>2,927 kNm</strong></li>
+                        <li>Nhập phản lực: <strong>3,108 kN</strong></li>
+                        <li>Nhập đường cong lực – biến dạng (Load-Deflection Curve)</li>
+                        <li>Nhập khoảng cách giữa các đệm va dọc theo tuyến bến</li>
+                    </ul>
+                </div>
+
+                <div class="param-box">
+                    <div class="param-row">
+                        <span class="param-key">Fender Type</span>
+                        <span class="param-val">SPC 1800H G2.61 (Cone)</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Height</span>
+                        <span class="param-val">1.8 m</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Center Elevation</span>
+                        <span class="param-val">+3.0 mCD</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Energy Absorption</span>
+                        <span class="param-val">2,927 kNm</span>
+                    </div>
+                    <div class="param-row">
+                        <span class="param-key">Reaction Force</span>
+                        <span class="param-val">3,108 kN</span>
+                    </div>
+                </div>
+
+                <div class="alert info">
+                    <span class="alert-icon">💡</span>
+                    <div>
+                        <strong>Lực tựa tàu (Breasting Force)</strong>
+                        Lực tựa tàu tác động lên đệm va trong quá trình neo đậu (mooring) thường không đáng kể so với lực va tàu (berthing). Trong phân tích này, lực tựa tàu được xác nhận là nhỏ và không cần kiểm tra thêm trong báo cáo.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SCENARIO -->
+            <div class="tab-panel" id="tab-scenario">
+                <h3 style="color: var(--primary); margin-bottom: 16px;">📋 Thiết lập Kịch bản phân tích (Design Scenarios)</h3>
+
+                <div class="step-block">
+                    <h4>🗂️ Bước 2.10 – Xác định ma trận kịch bản</h4>
+                    <p>Mỗi kịch bản là một tổ hợp của: Tàu + Mạn neo + Mớn nước + Mực nước</p>
+                </div>
+
+                <div class="data-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Case</th>
+                                <th>Mạn neo</th>
+                                <th>Mớn nước</th>
+                                <th>Mực nước</th>
+                                <th>Áp dụng cho tàu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="highlight">Case 1</td>
+                                <td>Starboard (Mạn phải)</td>
+                                <td>Max Draught</td>
+                                <td>HWL +3.97 mCD</td>
+                                <td>14,
+                            </tr>
+                            <tr>
+                                <td class="highlight">Case 2</td>
+                                <td>Starboard (Mạn phải)</td>
+                                <td>Max Draught → Min Draught</td>
+                                <td>LWL +0.58 mCD → HWL +3.97 mCD</td>
+                                <td>14,000 / 24,000 / 23,000 TEU</td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">Case 3</td>
+                                <td>Starboard (Mạn phải)</td>
+                                <td>Min Draught → Max Draught</td>
+                                <td>HWL +3.97 mCD → LWL +0.58 mCD</td>
+                                <td>14,000 / 24,000 / 23,000 TEU</td>
+                            </tr>
+                            <tr>
+                                <td class="highlight">Case 4</td>
+                                <td>Starboard (Mạn phải)</td>
+                                <td>Min Draught</td>
+                                <td>LWL +0.58 mCD</td>
+                                <td>14,000 / 24,000 / 23,000 TEU</td>
+                            </tr>
+                            <tr style="background:#fff8f0;">
+                                <td class="highlight">Case 5</td>
+                                <td>Port Side (Mạn trái)</td>
+                                <td>Max Draught</td>
+                                <td>HWL +3.97 mCD</td>
+                                <td>14,000 TEU only</td>
+                            </tr>
+                            <tr style="background:#fff8f0;">
+                                <td class="highlight">Case 6</td>
+                                <td>Port Side (Mạn trái)</td>
+                                <td>Max Draught → Min Draught</td>
+                                <td>LWL +0.58 mCD → HWL +3.97 mCD</td>
+                                <td>14,000 TEU only</td>
+                            </tr>
+                            <tr style="background:#fff8f0;">
+                                <td class="highlight">Case 7</td>
+                                <td>Port Side (Mạn trái)</td>
+                                <td>Min Draught → Max Draught</td>
+                                <td>HWL +3.97 mCD → LWL +0.58 mCD</td>
+                                <td>14,000 TEU only</td>
+                            </tr>
+                            <tr style="background:#fff8f0;">
+                                <td class="highlight">Case 8</td>
+                                <td>Port Side (Mạn trái)</td>
+                                <td>Min Draught</td>
+                                <td>LWL +0.58 mCD</td>
+                                <td>14,000 TEU only</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert warning" style="margin-top: 16px;">
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>Lý do xét cả Starboard và Port Side cho tàu 14,000 TEU</strong>
+                        Do vị trí các điểm neo cho tàu 14,000 TEU trong giai đoạn đầu không đối xứng (asymmetrical bollard layout), cần kiểm tra cả hai mạn neo để xác định trường hợp bất lợi nhất. Tàu 24,000 TEU và 23,000 TEU chỉ cần xét Starboard do bố trí bến đối xứng hơn.
+                    </div>
+                </div>
+
+                <div class="step-block purple" style="margin-top: 20px;">
+                    <h4>📊 Bước 2.11 – Tổng số lần chạy phân tích</h4>
+                    <ul>
+                        <li>14,000 TEU – 8 winches: 8 cases × 2 bollard options = <strong>16 runs</strong></li>
+                        <li>14,000 TEU – 6 winches: 8 cases = <strong>8 runs</strong></li>
+                        <li>24,000 TEU: 4 cases = <strong>4 runs</strong></li>
+                        <li>23,000 TEU: 4 cases = <strong>4 runs</strong></li>
+                        <li><strong>Tổng cộng: ~32 runs</strong> (chưa kể các lần thử nghiệm tối ưu hóa)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PHASE 3: RUNNING ANALYSIS -->
+<section class="section" id="phase3">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-orange">3</div>
+            <div class="section-title">
+                <h2>Phase 3: Chạy Phân tích trong OPTIMOOR</h2>
+                <p>Running Analysis & Iteration Process</p>
+            </div>
+        </div>
+
+        <div class="flow-diagram">
+
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--secondary);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>🔍 Bước 3.1 – Kiểm tra Model trước khi chạy (Pre-run Check)</h4>
+                    <p>Xác nhận tất cả các thông số đầu vào đã được nhập đúng: hướng bến, tọa độ bích neo, kích thước tàu, đặc tính dây neo, điều kiện môi trường. Kiểm tra tàu có nằm đúng vị trí so với tuyến bến không (visual check trong OPTIMOOR).</p>
+                </div>
+            </div>
+
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent2);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>▶️ Bước 3.2 – Chạy phân tích từng kịch bản (Run Each Case)</h4>
+                    <p>Chạy lần lượt từng case theo ma trận kịch bản đã thiết lập. Với mỗi case, OPTIMOOR sẽ quét toàn bộ hướng gió (0°–360°) và tìm ra tổ hợp bất lợi nhất. Ghi lại kết quả lực căng lớn nhất trong từng dây neo và lực tại từng bích neo.</p>
+                </div>
+            </div>
+
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>⚡ Bước 3.3 – Kiểm tra kết quả sơ bộ (Preliminary Check)</h4>
+                    <p>Sau mỗi case, kiểm tra ngay: (1) Có dây neo nào vượt WLL = 50% MBL không? (2) Có dây neo nào bị chùng (slack) không? (3) Góc dây neo theo phương đứng có vượt 75° không? Nếu có vi phạm → điều chỉnh mặt bằng neo và chạy lại.</p>
+                </div>
+            </div>
+
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent3);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>🔄 Bước 3.4 – Tối ưu hóa mặt bằng neo (Optimization Loop)</h4>
+                    <p>Nếu kết quả không đạt tiêu chí: điều chỉnh số lượng dây neo, thay đổi vị trí buộc dây (bollard selection), hoặc điều chỉnh góc dây neo. Lặp lại quá trình cho đến khi tất cả tiêu chí được thỏa mãn. Đây thường là bước tốn thời gian nhất trong quy trình.</p>
+                </div>
+            </div>
+
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: #9b59b6;"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📋 Bước 3.5 – Xác nhận mặt bằng neo an toàn (Safe Arrangement Confirmation)</h4>
+                    <p>Khi tất cả các case đều đạt tiêu chí, ghi lại mặt bằng neo an toàn cuối cùng (Safe Mooring Arrangement) cho từng tàu. Xuất kết quả chi tiết từ OPTIMOOR cho bước post-processing.</p>
+                </div>
+            </div>
+
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent2);"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>💾 Bước 3.6 – Lưu file OPTIMOOR (Save & Export)</h4>
+                    <p>Lưu file OPTIMOOR (.moo) cho từng tàu và từng kịch bản. Xuất báo cáo kết quả dạng text/PDF từ OPTIMOOR. Lưu trữ theo cấu trúc thư mục rõ ràng: Vessel → Case → Option.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="alert success" style="margin-top: 10px;">
+            <span class="alert-icon">✅</span>
+            <div>
+                <strong>Tip: Quy trình tối ưu hóa hiệu quả</strong>
+                Bắt đầu với case bất lợi nhất (thường là Case 1 – Max Draught + HWL + Starboard). Nếu mặt bằng neo đạt yêu cầu ở case này, các case còn lại thường cũng đạt. Điều này giúp tiết kiệm thời gian trong vòng lặp tối ưu hóa.
+            </div>
+        </div>
+
+        <!-- Optimization decision flowchart -->
+        <h3 style="margin-top: 30px; color: var(--primary); font-size: 1.1rem; margin-bottom: 16px;">🔄 Sơ đồ quyết định tối ưu hóa mặt bằng neo</h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+
+            <div class="step-block red">
+                <h4>❌ Nếu lực dây neo > WLL (50% MBL)</h4>
+                <ul>
+                    <li>Tăng số lượng dây neo (thêm breast lines)</li>
+                    <li>Thay đổi góc dây neo (điều chỉnh vị trí bollard)</li>
+                    <li>Kiểm tra lại loại dây neo (MBL cao hơn)</li>
+                    <li>Xem xét giảm vận tốc gió khai thác</li>
+                </ul>
+            </div>
+
+            <div class="step-block orange">
+                <h4>⚠️ Nếu dây neo bị chùng (Slack Lines)</h4>
+                <ul>
+                    <li>Điều chỉnh lại pretension</li>
+                    <li>Thay đổi góc bố trí dây neo</li>
+                    <li>Kiểm tra lại vị trí fairlead so với bollard</li>
+                    <li>Cân nhắc loại bỏ dây chùng và phân bổ lại</li>
+                </ul>
+            </div>
+
+            <div class="step-block orange">
+                <h4>⚠️ Nếu góc đứng dây neo > 75°</h4>
+                <ul>
+                    <li>Điều chỉnh cao trình bollard hoặc fairlead</li>
+                    <li>Xem xét thay đổi mực nước tính toán</li>
+                    <li>Bổ sung edge protection (steel nosing)</li>
+                    <li>Kiểm tra lại chiều dài dây neo</li>
+                </ul>
+            </div>
+
+            <div class="step-block green">
+                <h4>✅ Nếu tất cả tiêu chí đạt</h4>
+                <ul>
+                    <li>Ghi lại Safe Mooring Arrangement</li>
+                    <li>Xuất kết quả lực căng dây neo</li>
+                    <li>Xuất lực tại từng bollard point</li>
+                    <li>Tiến hành post-processing</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PHASE 4: POST-PROCESSING -->
+<section class="section" id="phase4">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-purple">4</div>
+            <div class="section-title">
+                <h2>Phase 4: Xử lý Kết quả (Post-Processing)</h2>
+                <p>Results Extraction, Verification & Documentation</p>
+            </div>
+        </div>
+
+        <!-- Sub-section 4.1 -->
+        <div class="step-block purple">
+            <h4>📊 Bước 4.1 – Tổng hợp lực căng dây neo (Mooring Line Forces)</h4>
+            <p>Từ kết quả OPTIMOOR, lập bảng tổng hợp lực căng lớn nhất trong dây neo cho từng case:</p>
+            <ul>
+                <li>Ghi lại lực căng lớn nhất (kN) và tỷ lệ % MBL cho từng case</li>
+                <li>Xác định case bất lợi nhất (governing case) cho từng tàu</li>
+                <li>So sánh với WLL = 50% MBL → xác nhận đạt/không đạt</li>
+                <li>Lập bảng riêng cho từng tàu và từng option winches</li>
+            </ul>
+        </div>
+
+        <h3 style="color: var(--primary); font-size: 1rem; margin: 20px 0 12px;">📋 Ví dụ bảng tổng hợp kết quả (Gemalink Phase 2)</h3>
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Case</th>
+                        <th colspan="2">14,000 TEU – 8 winches<br>V<sub>wind</sub> = 20.7 m/s</th>
+                        <th colspan="2">14,000 TEU – 6 winches<br>V<sub>wind</sub> = 17.1 m/s</th>
+                        <th colspan="2">24,000 TEU</th>
+                        <th colspan="2">23,000 TEU</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th>Force (kN)</th>
+                        <th>% MBL</th>
+                        <th>Force (kN)</th>
+                        <th>% MBL</th>
+                        <th>Force (kN)</th>
+                        <th>% MBL</th>
+                        <th>Force (kN)</th>
+                        <th>% MBL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>517</td><td>40%</td><td>565</td><td>44%</td><td>547</td><td>36%</td><td>633</td><td>45%</td></tr>
+                    <tr><td>2</td><td>551</td><td>43%</td><td>618</td><td>48%</td><td>608</td><td>41%</td><td>675</td><td>48%</td></tr>
+                    <tr><td>3</td><td>490</td><td>38%</td><td>523</td><td>41%</td><td>504</td><td>34%</td><td>593</td><td>43%</td></tr>
+                    <tr><td>4</td><td>496</td><td>39%</td><td>550</td><td>43%</td><td>535</td><td>36%</td><td>607</td><td>44%</td></tr>
+                    <tr><td>5</td><td>511</td><td>40%</td><td>577</td><td>45%</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+                    <tr><td>6</td><td>555</td><td>43%</td><td>612</td><td>48%</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+                    <tr><td>7</td><td>483</td><td>38%</td><td>535</td><td>42%</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+                    <tr><td>8</td><td>497</td><td>39%</td><td>557</td><td>43%</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+                    <tr style="background:#eafaf1; font-weight:700;">
+                        <td>MAX</td>
+                        <td>555</td>
+                        <td style="color:#1e8449;">43%</td>
+                        <td>618</td>
+                        <td style="color:#1e8449;">48%</td>
+                        <td>608</td>
+                        <td style="color:#1e8449;">41%</td>
+                        <td>675</td>
+                        <td style="color:#1e8449;">48%</td>
+                    </tr>
+                    <tr style="background:#fef9e7;">
+                        <td colspan="2" style="font-weight:700;">WLL Limit</td>
+                        <td style="color:#b7770d; font-weight:700;">50% MBL</td>
+                        <td></td>
+                        <td style="color:#b7770d; font-weight:700;">50% MBL</td>
+                        <td></td>
+                        <td style="color:#b7770d; font-weight:700;">50% MBL</td>
+                        <td></td>
+                        <td style="color:#b7770d; font-weight:700;">50% MBL</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="result-grid" style="margin-top: 24px;">
+            <div class="result-card">
+                <div class="metric ok">43%</div>
+                <div class="metric-label">14,000 TEU – 8 Winches</div>
+                <div class="metric-desc">Max % MBL &lt; 50% ✅ PASS</div>
+            </div>
+            <div class="result-card">
+                <div class="metric ok">48%</div>
+                <div class="metric-label">14,000 TEU – 6 Winches</div>
+                <div class="metric-desc">Max % MBL &lt; 50% ✅ PASS</div>
+            </div>
+            <div class="result-card">
+                <div class="metric ok">41%</div>
+                <div class="metric-label">24,000 TEU</div>
+                <div class="metric-desc">Max % MBL &lt; 50% ✅ PASS</div>
+            </div>
+            <div class="result-card">
+                <div class="metric ok">48%</div>
+                <div class="metric-label">23,000 TEU</div>
+                <div class="metric-desc">Max % MBL &lt; 50% ✅ PASS</div>
+            </div>
+        </div>
+
+        <!-- Sub-section 4.2 -->
+        <div class="step-block" style="margin-top: 30px;">
+            <h4>📐 Bước 4.2 – Kiểm tra Góc dây neo theo phương đứng (Vertical Line Angle)</h4>
+            <ul>
+                <li>Trích xuất góc dây neo phương đứng lớn nhất và nhỏ nhất từ OPTIMOOR</li>
+                <li>So sánh với giới hạn cho phép: <strong>Max ≤ 75°</strong> (theo tiêu chuẩn bollard)</li>
+                <li>Kiểm tra trường hợp góc âm (dây neo kéo xuống dưới mặt bến) → cần edge protection</li>
+            </ul>
+        </div>
+
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tàu</th>
+                        <th>Góc đứng lớn nhất (°)</th>
+                        <th>Góc đứng nhỏ nhất (°)</th>
+                        <th>Giới hạn cho phép (°)</th>
+                        <th>Đánh giá</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">14,000 TEU</td>
+                        <td>31</td>
+                        <td>29</td>
+                        <td>75</td>
+                        <td style="color:#1e8449; font-weight:700;">✅ ĐẠT</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">24,000 TEU</td>
+                        <td>38</td>
+                        <td>40</td>
+                        <td>75</td>
+                        <td style="color:#1e8449; font-weight:700;">✅ ĐẠT</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">23,000 TEU</td>
+                        <td>48</td>
+                        <td>7</td>
+                        <td>75</td>
+                        <td style="color:#1e8449; font-weight:700;">✅ ĐẠT</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert warning" style="margin-top: 16px;">
+            <span class="alert-icon">⚠️</span>
+            <div>
+                <strong>Góc neo nhỏ (Tàu nhỏ – Góc âm tiềm năng)</strong>
+                Đối với các tàu nhỏ hơn có thể xảy ra góc dây neo âm (dây kéo xuống dưới mặt bến). Trong trường hợp này, cần bổ sung biện pháp bảo vệ: <strong>steel nosing (thép ốp góc)</strong> hoặc <strong>chamfered edges (vát góc bê tông)</strong> để giảm ma sát và tránh mài mòn dây neo và hư hỏng bê tông cope.
+            </div>
+        </div>
+
+        <!-- Sub-section 4.3 -->
+        <div class="step-block green" style="margin-top: 24px;">
+            <h4>⚓ Bước 4.3 – Xác định Tải trọng Bích neo (Bollard Load Calculation)</h4>
+            <p>Từ kết quả OPTIMOOR, trích xuất lực tác dụng lên từng điểm neo (mooring point load):</p>
+            <ul>
+                <li>Tổng hợp lực tại từng bích neo cho tất cả các case</li>
+                <li>Xác định lực lớn nhất trên một bích neo (governing bollard load)</li>
+                <li>Lực này là cơ sở để lựa chọn loại bích neo (bollard capacity – SWL)</li>
+                <li>Kiểm tra: Lực lớn nhất ≤ SWL của bích neo được chọn</li>
+            </ul>
+        </div>
+
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tàu</th>
+                        <th>Điểm neo (Bollard)</th>
+                        <th>Lực lớn nhất (tấn)</th>
+                        <th>Case bất lợi nhất</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight" rowspan="3">14,000 TEU – 8 winches</td>
+                        <td>A1 (Head)</td>
+                        <td>153</td>
+                        <td>Case 2</td>
+                    </tr>
+                    <tr>
+                        <td>B2 (Breast)</td>
+                        <td>183</td>
+                        <td>Case 2</td>
+                    </tr>
+                    <tr>
+                        <td>R5 (Stern)</td>
+                        <td>182</td>
+                        <td>Case 6</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight" rowspan="3">24,000 TEU</td>
+                        <td>*F6 (Breast)</td>
+                        <td>194</td>
+                        <td>Case 3</td>
+                    </tr>
+                    <tr>
+                        <td>*G7 (Breast)</td>
+                        <td>192</td>
+                        <td>Case 1/3</td>
+                    </tr>
+                    <tr>
+                        <td>D3 (Breast)</td>
+                        <td>183</td>
+                        <td>Case 3</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight" rowspan="2">23,000 TEU</td>
+                        <td>D (Breast)</td>
+                        <td>186</td>
+                        <td>Case 2</td>
+                    </tr>
+                    <tr>
+                        <td>*F (Breast)</td>
+                        <td>168</td>
+                        <td>Case 2</td>
+                    </tr>
+                    <tr style="background:#eafaf1; font-weight:700;">
+                        <td colspan="2">Lực lớn nhất tổng thể (Governing)</td>
+                        <td style="color:#c0392b; font-size:1.1rem;">194 tấn</td>
+                        <td>24,000 TEU – Case 3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert success" style="margin-top: 16px;">
+            <span class="alert-icon">✅</span>
+            <div>
+                <strong>Kết luận lựa chọn Bích neo</strong>
+                Lực lớn nhất tại một điểm neo là <strong>194 tấn</strong> (tàu 24,000 TEU). Do đó, chọn bích neo có SWL = <strong>200 tấn</strong> là phù hợp. Khoảng cách bích neo: tại mỗi 2 nhịp dầm ngang ≈ <strong>11.5m đến 12.5m c/c</strong>.
+            </div>
+        </div>
+
+        <!-- Sub-section 4.4 -->
+        <div class="step-block" style="margin-top: 24px;">
+            <h4>🗺️ Bước 4.4 – Vẽ mặt bằng neo an toàn (Safe Mooring Arrangement Drawing)</h4>
+            <ul>
+                <li>Vẽ lại mặt bằng neo an toàn cho từng tàu dựa trên kết quả OPTIMOOR</li>
+                <li>Thể hiện rõ: số lượng dây, loại dây (HL/SL/BL/SP), vị trí bollard được sử dụng</li>
+                <li>Ghi chú vận tốc gió khai thác tối đa cho từng phương án</li>
+                <li>Xuất bản vẽ sang AutoCAD hoặc định dạng phù hợp cho hồ sơ thiết kế</li>
+                <li>Đưa vào Appendix của báo cáo (Appendix A6–A9)</li>
+            </ul>
+        </div>
+
+        <!-- Sub-section 4.5 -->
+        <div class="step-block orange" style="margin-top: 16px;">
+            <h4>📝 Bước 4.5 – Lập bảng tổng hợp kết quả cho Báo cáo</h4>
+            <ul>
+                <li>Bảng lực căng dây neo (Mooring Line Forces Table) – theo từng tàu</li>
+                <li>Bảng góc dây neo phương đứng (Vertical Angle Table)</li>
+                <li>Bảng lực tại điểm neo (Bollard Load Table)</li>
+                <li>Bảng tóm tắt mặt bằng neo an toàn (Safe Arrangement Summary)</li>
+                <li>Đính kèm kết quả chi tiết OPTIMOOR vào Appendix (A1–A4)</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ CRITERIA -->
+<section class="section" id="criteria">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-red">5</div>
+            <div class="section-title">
+                <h2>Tiêu chí Đánh giá Kết quả</h2>
+                <p>Acceptance Criteria for Mooring Analysis Results</p>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <div class="card">
+                <div class="card-icon">🪢</div>
+                <h3>Tiêu chí 1 – Lực căng dây neo</h3>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-pass">✅ PASS</span>
+                    <span class="criteria-text">Lực căng trong dây neo</span>
+                    <span class="criteria-value">≤ 50% MBL</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-limit">⚠️ LIMIT</span>
+                    <span class="criteria-text">Tiếp cận giới hạn</span>
+                    <span class="criteria-value">45–50% MBL</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-fail">❌ FAIL</span>
+                    <span class="criteria-text">Vượt giới hạn WLL</span>
+                    <span class="criteria-value">&gt; 50% MBL</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-top:10px;">Theo OCIMF MEG4 cho loại dây HMPE. WLL = 50% MBL.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📐</div>
+                <h3>Tiêu chí 2 – Góc dây neo phương đứng</h3>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-pass">✅ PASS</span>
+                    <span class="criteria-text">Góc đứng dây neo</span>
+                    <span class="criteria-value">≤ 75°</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-limit">⚠️ PROTECT</span>
+                    <span class="criteria-text">Góc âm → cần edge protection</span>
+                    <span class="criteria-value">&lt; 0°</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-fail">❌ FAIL</span>
+                    <span class="criteria-text">Vượt giới hạn bollard</span>
+                    <span class="criteria-value">&gt; 75°</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-top:10px;">Góc vận hành tối đa cho phép của bích neo là 75°.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⚓</div>
+                <h3>Tiêu chí 3 – Tải trọng Bích neo</h3>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-pass">✅ PASS</span>
+                    <span class="criteria-text">Lực tại bollard</span>
+                    <span class="criteria-value">≤ SWL bollard</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-fail">❌ FAIL</span>
+                    <span class="criteria-text">Vượt SWL bollard</span>
+                    <span class="criteria-value">&gt; SWL bollard</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-top:10px;">Gemalink Phase 2: Chọn bollard SWL = 200 tấn. Lực max = 194 tấn ✅</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🌊</div>
+                <h3>Tiêu chí 4 – Chuyển vị tàu</h3>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-pass">✅ PASS</span>
+                    <span class="criteria-text">Surge (dọc)</span>
+                    <span class="criteria-value">≤ 1.0 m</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-pass">✅ PASS</span>
+                    <span class="criteria-text">Sway (ngang)</span>
+                    <span class="criteria-value">≤ 1.0 m</span>
+                </div>
+                <div class="criteria-item">
+                    <span class="criteria-badge badge-pass">✅ PASS</span>
+                    <span class="criteria-text">Yaw (xoay)</span>
+                    <span class="criteria-value">≤ 2°</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-top:10px;">Theo PIANC 115-2012 cho tàu container đang khai thác.</p>
+            </div>
+
+        </div>
+
+        <!-- Summary criteria table -->
+        <h3 style="margin-top: 30px; color: var(--primary); font-size: 1.1rem; margin-bottom: 16px;">📋 Bảng tổng hợp tiêu chí và giới hạn thiết kế</h3>
+        <div class="data-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tiêu chí</th>
+                        <th>Tham số kiểm tra</th>
+                        <th>Giới hạn cho phép</th>
+                        <th>Tiêu chuẩn tham chiếu</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">Lực căng dây neo (WLL)</td>
+                        <td>T<sub>max</sub> / MBL</td>
+                        <td>≤ 50% MBL</td>
+                        <td>OCIMF MEG4</td>
+                        <td>Áp dụng cho dây HMPE</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Lực căng trước (Pretension)</td>
+                        <td>T<sub>pre</sub> / MBL</td>
+                        <td>= 10% MBL</td>
+                        <td>PIANC 186</td>
+                        <td>Áp dụng cho tàu lớn</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Góc đứng dây neo</td>
+                        <td>θ<sub>vertical</sub></td>
+                        <td>≤ 75°</td>
+                        <td>BS 6349-4:2014</td>
+                        <td>Giới hạn vận hành bollard</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Tải trọng bollard</td>
+                        <td>F<sub>bollard</sub></td>
+                        <td>≤ SWL bollard</td>
+                        <td>BS 6349-4:2014</td>
+                        <td>SWL = 200T cho Phase 2</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Vận tốc gió khai thác</td>
+                        <td>V<sub>wind</sub></td>
+                        <td>DWT&gt;200kT: 17.1 m/s<br>DWT≤200kT: 20.6 m/s</td>
+                        <td>BoD Project</td>
+                        <td>Tàu rời bến nếu vượt</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">Lực tựa tàu (Fender)</td>
+                        <td>F<sub>fender</sub></td>
+                        <td>≤ Reaction Force</td>
+                        <td>BS 6349-4:2014</td>
+                        <td>Thường nhỏ, có thể bỏ qua</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ CHECKLIST -->
+<section class="section" id="checklist">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-number sn-green">6</div>
+            <div class="section-title">
+                <h2>Checklist Tổng thể & Phase 5: Báo cáo</h2>
+                <p>Complete Workflow Checklist & Reporting Phase</p>
+            </div>
+        </div>
+
+        <div class="card-grid">
+
+            <div class="card">
+                <div class="card-icon">📥</div>
+                <h3>☑ Phase 1 – Thu thập số liệu</h3>
+                <ul class="checklist">
+                    <li><span class="check-box">✓</span>Số liệu tàu thiết kế (LOA, Beam, Draught, Windage)</li>
+                    <li><span class="check-box">✓</span>Đặc tính dây neo (MBL, Load-Elongation Curve)</li>
+                    <li><span class="check-box">✓</span>Điều kiện gió, dòng chảy, mực nước</li>
+                    <li><span class="check-box">✓</span>Mặt bằng bến và tọa độ bollard</li>
+                    <li><span class="check-box">✓</span>Số liệu đệm va (Fender data)</li>
+                    <li><span class="check-box">✓</span>Tiêu chuẩn thiết kế áp dụng</li>
+                    <li><span class="check-box">✓</span>Xác nhận nguồn gốc số liệu với Client</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⚙️</div>
+                <h3>☑ Phase 2 – Dựng Model</h3>
+                <ul class="checklist">
+                    <li><span class="check-box">✓</span>Nhập hướng bến và kiểu kết cấu</li>
+                    <li><span class="check-box">✓</span>Nhập tọa độ tất cả bollard</li>
+                    <li><span class="check-box">✓</span>Nhập kích thước tàu và windage area</li>
+                    <li><span class="check-box">✓</span>Nhập vị trí fairlead và số winches</li>
+                    <li><span class="check-box">✓</span>Nhập đặc tính dây neo và pretension</li>
+                    <li><span class="check-box">✓</span>Nhập thông số đệm va</li>
+                    <li><span class="check-box">✓</span>Nhập điều kiện môi trường</li>
+                    <li><span class="check-box">✓</span>Thiết lập ma trận kịch bản đầy đủ</li>
+                    <li><span class="check-box">✓</span>Visual check model trong OPTIMOOR</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔄</div>
+                <h3>☑ Phase 3 – Chạy phân tích</h3>
+                <ul class="checklist">
+                    <li><span class="check-box">✓</span>Chạy tất cả cases theo ma trận kịch bản</li>
+                    <li><span class="check-box">✓</span>Kiểm tra sơ bộ sau mỗi case</li>
+                    <li><span class="check-box">✓</span>Tối ưu hóa mặt bằng neo nếu cần</li>
+                    <li><span class="check-box">✓</span>Xác nhận Safe Mooring Arrangement</li>
+                    <li><span class="check-box">✓</span>Lưu file OPTIMOOR (.moo) đầy đủ</li>
+                    <li><span class="check-box">✓</span>Xuất kết quả chi tiết từ OPTIMOOR</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h3>☑ Phase 4 – Post-processing</h3>
+                <ul class="checklist">
+                    <li><span class="check-box">✓</span>Tổng hợp lực căng dây neo (% MBL)</li>
+                    <li><span class="check-box">✓</span>Kiểm tra WLL ≤ 50% MBL</li>
+                    <li><span class="check-box">✓</span>Kiểm tra góc đứng dây neo ≤ 75°</li>
+                    <li><span class="check-box">✓</span>Xác định lực lớn nhất tại bollard</li>
+                    <li><span class="check-box">✓</span>Lựa chọn loại và SWL bollard</li>
+                    <li><span class="check-box">✓</span>Vẽ Safe Mooring Arrangement</li>
+                    <li><span class="check-box">✓</span>Lập bảng tổng hợp kết quả</li>
+                    <li><span class="check-box">✓</span>Kiểm tra edge protection nếu cần</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Phase 5: Reporting -->
+        <h3 style="margin-top: 30px; color: var(--primary); font-size: 1.1rem; margin-bottom: 16px;">📝 Phase 5 – Cấu trúc Báo cáo Phân tích Neo tàu</h3>
+
+        <div class="flow-diagram">
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--secondary);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 1 – Tổng quan & Phạm vi (General & Scope)</h4>
+                    <p>Giới thiệu dự án, mục tiêu phân tích, phạm vi báo cáo, danh sách tài liệu tham khảo.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent2);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 2 – Tiêu chuẩn thiết kế (Design Codes)</h4>
+                    <p>Liệt kê các tiêu chuẩn BS, PIANC, OCIMF áp dụng trong phân tích.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 3 – Phương pháp phân tích (Analysis Method)</h4>
+                    <p>Mô tả phần mềm OPTIMOOR, phương pháp Elastic Analysis (Method 1 – BS 6349-4), các giả thiết tính toán.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: #9b59b6;"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 4 – Thông số thiết kế (Design Parameters)</h4>
+                    <p>Số liệu tàu, đặc tính dây neo, cao trình thiết kế, điều kiện môi trường, số liệu đầu vào OPTIMOOR.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent3);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 5–6 – Tiêu chí & Kịch bản (Criteria & Scenarios)</h4>
+                    <p>WLL, giới hạn góc neo, ma trận kịch bản thiết kế đầy đủ.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--secondary);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 7 – Mặt bằng bố trí dây neo (Mooring Arrangement)</h4>
+                    <p>Hình ảnh mặt bằng neo điển hình từ OPTIMOOR cho từng tàu và từng phương án.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent2);"></div>
+                    <div class="flow-line"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 8 – Kết quả phân tích (Analysis Results)</h4>
+                    <p>Mặt bằng neo an toàn, bảng lực căng dây neo, góc dây neo, lực tại bollard, lựa chọn bollard.</p>
+                </div>
+            </div>
+            <div class="flow-item">
+                <div class="flow-connector">
+                    <div class="flow-dot" style="background: var(--accent);"></div>
+                </div>
+                <div class="flow-content">
+                    <h4>📄 Phần 9 – Kết luận & Phụ lục (Conclusion & Appendices)</h4>
+                    <p>Tóm tắt kết quả, kết luận thiết kế, kết quả chi tiết OPTIMOOR (Appendix A1–A9), bản vẽ mặt bằng neo.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final summary box -->
+        <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 14px; padding: 28px 32px; margin-top: 30px; color: white;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 16px;">🎯 Tóm tắt kết quả chính – Gemalink Phase 2</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; text-align:center;">
+                    <div style="font-size:1.6rem; font-weight:800;">200T</div>
+                    <div style="font-size:0.8rem; opacity:0.85;">Bollard SWL được chọn</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; text-align:center;">
+                    <div style="font-size:1.6rem; font-weight:800;">12.5m</div>
+                    <div style="font-size:0.8rem; opacity:0.85;">Khoảng cách bollard c/c</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; text-align:center;">
+                    <div style="font-size:1.6rem; font-weight:800;">48%</div>
+                    <div style="font-size:0.8rem; opacity:0.85;">Max % MBL (tất cả tàu)</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; text-align:center;">
+                    <div style="font-size:1.6rem; font-weight:800;">48°</div>
+                    <div style="font-size:0.8rem; opacity:0.85;">Max góc đứng dây neo</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; text-align:center;">
+                    <div style="font-size:1.6rem; font-weight:800;">18</div>
+                    <div style="font-size:0.8rem; opacity:0.85;">Dây neo tàu 24,000 TEU</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px; text-align:center;">
+                    <div style="font-size:1.6rem; font-weight:800;">✅</div>
+                    <div style="font-size:0.8rem; opacity:0.85;">Tất cả tiêu chí đạt yêu cầu</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ FOOTER -->
+<footer>
+    <div class="container">
+        <p><strong>OPTIMOOR Workflow Guidelines</strong> – Gemalink Container Terminal Phase 2</p>
+        <p style="margin-top: 6px;">Ref: VN3045-HAS-XX-XX-RP-CM-1130 &nbsp;|&nbsp; Haskoning Vietnam Co. Ltd. &nbsp;|&nbsp; Version P02 &nbsp;|&nbsp; 27 March 2026</p>
+        <p style="margin-top: 6px; opacity:0.6; font-size:0.78rem;">Based on BS 6349-4:2014 | PIANC 186-2025 | OCIMF MEG4 | PIANC 115-2012</p>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ SCRIPTS -->
+<script>
+    function showTab(tabId, btn) {
+        // Hide all panels
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // Show selected
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

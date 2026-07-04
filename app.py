@@ -78,7 +78,7 @@ def build_task_tree_markdown() -> str:
         return files or ["(empty)"]
 
     task_tree = {
-        "Mooring Force Dashboard": {
+        "Rose Chart Maker": {
             "input": list_files(MOORING_INPUT_DIR),
             "output": list_files(MOORING_OUTPUT_DIR),
         },
@@ -425,19 +425,19 @@ def main():
     optimoor_template_bytes = get_optimoor_template_bytes()
 
     st.set_page_config(page_title="CN Toolkit", page_icon="⚓", layout="wide")
-    st.sidebar.header("About me")
+    st.sidebar.header("OPTIMOOR TOOL")
     st.sidebar.markdown("**Author:** Nguyen Van Cong  \n"   
                         "**Location:** Vietnam  \n"    
                         "**Phone:** 0979404641  \n"  
                         "**Email:** nvcong89@live.com")
     st.sidebar.markdown("---")
-    st.sidebar.header("⚙️ Navigation")
-    task = st.sidebar.radio("Select task", ["Mooring Force Dashboard", "Optimoor RTF to Excel"])
+    st.sidebar.header("⚙️ Menu")
+    task = st.sidebar.radio("Select task", ["Rose Chart Maker", "Optimoor RTF to Excel"])
     st.sidebar.markdown("---")
     
 
-    if task == "Mooring Force Dashboard":
-        st.title("CN Toolkit")
+    if task == "Rose Chart Maker":
+        st.title("🧭 Rose Chart Maker")
         st.caption("Upload Excel files, view charts live on the web, and save results.")
 
         uploaded_file = st.sidebar.file_uploader(
