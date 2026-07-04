@@ -28,6 +28,7 @@ OPTI_OUTPUT_DIR = OPTI_TASK_DIR / "output"
 TEMPLATE_DIR = BASE_DIR / "template"
 TEMPLATE_INPUT_PATH = BASE_DIR / "images" / "template_input_data.xlsx"
 OPTIMOOR_TEMPLATE_PATH = TEMPLATE_DIR / "Optimoor Tool-Master_Post-Processing.xlsm"
+GUIDE_FILE_PATH = BASE_DIR / "OPTIMOOR-TECHNICAL WORKFLOW GUIDE.html"
 DPI = 150
 SHIP_ZOOM = 0.10
 DANGER_ZONE = (225, 315)
@@ -56,6 +57,17 @@ def sanitize_filename(name: str) -> str:
 def ensure_task_directories() -> None:
     for path in [TASKS_DIR, MOORING_TASK_DIR, MOORING_INPUT_DIR, MOORING_OUTPUT_DIR, OPTI_TASK_DIR, OPTI_INPUT_DIR, OPTI_OUTPUT_DIR]:
         path.mkdir(parents=True, exist_ok=True)
+
+
+def open_path(path: Path) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"Không tìm thấy đường dẫn: {path}")
+    if os.name == 'nt':
+        os.startfile(str(path))
+    elif sys.platform == 'darwin':
+        subprocess.Popen(['open', str(path)])
+    else:
+        subprocess.Popen(['xdg-open', str(path)])
 
 
 def get_template_file_bytes() -> bytes:
@@ -434,7 +446,17 @@ def main():
     st.sidebar.header("⚙️ Menu")
     task = st.sidebar.radio("Select task", ["Rose Chart Maker", "Optimoor RTF to Excel"])
     st.sidebar.markdown("---")
-    
+
+    if GUIDE_FILE_PATH.exists():
+        if st.sidebar.button("📘 Open user guide", use_container_width=True):
+            try:
+                open_path(GUIDE_FILE_PATH)
+                st.sidebar.success("Đã mở hướng dẫn sử dụng.")
+            except Exception as e:
+                st.sidebar.warning(f"Không mở được hướng dẫn tự động: {e}")
+                st.sidebar.code(str(GUIDE_FILE_PATH))
+    else:
+        st.sidebar.info("Không tìm thấy file hướng dẫn HTML.")
 
     if task == "Rose Chart Maker":
         st.title("🧭 Rose Chart Maker")
@@ -505,12 +527,7 @@ def main():
             if st.button("Open output folder"):
                 try:
                     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-                    if os.name == 'nt':
-                        os.startfile(str(OUTPUT_DIR))
-                    elif sys.platform == 'darwin':
-                        subprocess.Popen(['open', str(OUTPUT_DIR)])
-                    else:
-                        subprocess.Popen(['xdg-open', str(OUTPUT_DIR)])
+                    open_path(OUTPUT_DIR)
                     st.toast("Đã mở thư mục output.")
                 except Exception as e:
                     st.warning(f"Không mở được thư mục tự động: {e}")
