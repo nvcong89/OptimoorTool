@@ -126,22 +126,36 @@ def save_uploaded_files(uploaded_files, target_dir: Path) -> list[Path]:
     target_dir.mkdir(parents=True, exist_ok=True)
     saved_paths = []
     for uploaded_file in uploaded_files:
-        dest_path = target_dir / uploaded_file.name
-        dest_path.write_bytes(uploaded_file.getvalue())
-        saved_paths.append(dest_path)
+        try:
+            dest_path = target_dir / uploaded_file.name
+            dest_path.write_bytes(uploaded_file.getvalue())
+            saved_paths.append(dest_path)
+        except Exception as e:
+            st.error(f"Lỗi khi lưu file {uploaded_file.name}: {e}")
     return saved_paths
 
 
 def convert_rtf_to_excel(uploaded_rtf_files) -> list[Path]:
     ensure_task_directories()
+    
+    # Debug: log directories
+    st.write(f"DEBUG: OPTI_INPUT_DIR = {OPTI_INPUT_DIR}")
+    st.write(f"DEBUG: OPTI_INPUT_DIR exists = {OPTI_INPUT_DIR.exists()}")
+    st.write(f"DEBUG: Number of uploaded files = {len(uploaded_rtf_files) if uploaded_rtf_files else 0}")
+    
     for path in OPTI_OUTPUT_DIR.glob("*.xlsx"):
         path.unlink(missing_ok=True)
     for path in OPTI_INPUT_DIR.glob("*.rtf"):
         path.unlink(missing_ok=True)
 
     saved_paths = save_uploaded_files(uploaded_rtf_files, OPTI_INPUT_DIR)
+    st.write(f"DEBUG: Saved paths = {saved_paths}")
+    
     rtf_files = sorted([p for p in OPTI_INPUT_DIR.glob("*.rtf") if p.is_file()])
+    st.write(f"DEBUG: RTF files found = {rtf_files}")
+    
     if not rtf_files:
+        st.error("Không tìm thấy file .rtf sau khi lưu. Kiểm tra quyền thư mục hoặc định dạng file.")
         return []
 
     cases, line_tensions, fenders, hook_bollard_forces = [], [], [], []
@@ -637,6 +651,7 @@ def main():
 
         if st.button("Convert .rtf to Excel"):
             if uploaded_rtf_files:
+                st.write(f"DEBUG: Uploaded files: {[f.name for f in uploaded_rtf_files]}")
                 with st.spinner("Đang chuyển đổi RTF sang Excel..."):
                     output_paths = convert_rtf_to_excel(uploaded_rtf_files)
                 if output_paths:
