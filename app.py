@@ -454,11 +454,7 @@ def main():
                         "**Location:** Vietnam  \n"    
                         "**Phone:** 0979404641  \n"  
                         "**Email:** nvcong89@live.com")
-    st.sidebar.markdown("---")
-    st.sidebar.header("⚙️ Menu")
-    task = st.sidebar.radio("Select task", ["Rose Chart Maker", "Optimoor RTF to Excel"])
-    st.sidebar.markdown("---")
-
+    
     if GUIDE_FILE_PATH.exists():
         col1, col2 = st.sidebar.columns(2)
         
@@ -497,6 +493,11 @@ def main():
             except Exception as e:
                 st.error(f"Lỗi khi đọc file hướng dẫn: {e}")
         st.markdown("---")
+    
+    st.sidebar.markdown("---")
+    st.sidebar.header("⚙️ Menu")
+    task = st.sidebar.radio("Select task", ["Rose Chart Maker", "Optimoor RTF to Excel"])
+    st.sidebar.markdown("---")
 
     if task == "Rose Chart Maker":
         st.title("🧭 Rose Chart Maker")
