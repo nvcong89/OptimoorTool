@@ -59,9 +59,14 @@ def ensure_task_directories() -> None:
         path.mkdir(parents=True, exist_ok=True)
 
 
-def is_local_environment() -> bool:
-    """Check if running locally vs Streamlit Cloud."""
-    return os.getenv('STREAMLIT_CLOUD') is None
+def can_open_file_locally() -> bool:
+    """Check if we can open files locally (not on Streamlit Cloud)."""
+    # On Streamlit Cloud, xdg-open is not available
+    if os.name != 'nt' and sys.platform != 'darwin':
+        # On Linux, check if xdg-open exists
+        result = subprocess.run(['which', 'xdg-open'], capture_output=True)
+        return result.returncode == 0
+    return True
 
 
 def open_path(path: Path) -> None:
@@ -72,7 +77,9 @@ def open_path(path: Path) -> None:
     elif sys.platform == 'darwin':
         subprocess.Popen(['open', str(path)])
     else:
-        subprocess.Popen(['xdg-open', str(path)])
+        result = subprocess.run(['xdg-open', str(path)], capture_output=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"Cannot open file on this system")
 
 
 def get_template_file_bytes() -> bytes:
@@ -453,7 +460,7 @@ def main():
     st.sidebar.markdown("---")
 
     if GUIDE_FILE_PATH.exists():
-        if is_local_environment():
+        if can_open_file_locally():
             if st.sidebar.button("📘 Open user guide", use_container_width=True):
                 try:
                     open_path(GUIDE_FILE_PATH)
