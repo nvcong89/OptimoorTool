@@ -14,6 +14,7 @@ import pandas as pd
 import seaborn as sns
 import streamlit as st
 import optimoor_rtf_to_excel as optimoor
+import optimoor_report_generator as report_gen
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,7 +26,11 @@ MOORING_OUTPUT_DIR = MOORING_TASK_DIR / "output"
 OPTI_TASK_DIR = TASKS_DIR / "optimoor_rtf_to_excel"
 OPTI_INPUT_DIR = OPTI_TASK_DIR / "input"
 OPTI_OUTPUT_DIR = OPTI_TASK_DIR / "output"
+REPORT_TASK_DIR = TASKS_DIR / "generate_report"
+REPORT_INPUT_DIR = REPORT_TASK_DIR / "input"
+REPORT_OUTPUT_DIR = REPORT_TASK_DIR / "output"
 TEMPLATE_DIR = BASE_DIR / "template"
+REPORT_TEMPLATE_PATH = TEMPLATE_DIR / "Mooring_Report_Template.docx"
 TEMPLATE_INPUT_PATH = BASE_DIR / "images" / "template_input_data.xlsx"
 OPTIMOOR_TEMPLATE_PATH = TEMPLATE_DIR / "Optimoor Tool-Master_Post-Processing.xlsm"
 GUIDE_FILE_PATH = BASE_DIR / "OPTIMOOR-TECHNICAL WORKFLOW GUIDE.html"
@@ -55,7 +60,11 @@ def sanitize_filename(name: str) -> str:
 
 
 def ensure_task_directories() -> None:
-    for path in [TASKS_DIR, MOORING_TASK_DIR, MOORING_INPUT_DIR, MOORING_OUTPUT_DIR, OPTI_TASK_DIR, OPTI_INPUT_DIR, OPTI_OUTPUT_DIR]:
+    for path in [
+        TASKS_DIR, MOORING_TASK_DIR, MOORING_INPUT_DIR, MOORING_OUTPUT_DIR,
+        OPTI_TASK_DIR, OPTI_INPUT_DIR, OPTI_OUTPUT_DIR,
+        REPORT_TASK_DIR, REPORT_INPUT_DIR, REPORT_OUTPUT_DIR,
+    ]:
         path.mkdir(parents=True, exist_ok=True)
 
 
@@ -94,6 +103,12 @@ def get_optimoor_template_bytes() -> bytes:
     return b""
 
 
+def get_report_template_bytes() -> bytes:
+    if REPORT_TEMPLATE_PATH.exists():
+        return REPORT_TEMPLATE_PATH.read_bytes()
+    return b""
+
+
 def build_task_tree_markdown() -> str:
     def list_files(path: Path) -> list[str]:
         if not path.exists():
@@ -109,6 +124,10 @@ def build_task_tree_markdown() -> str:
         "Optimoor RTF → Excel": {
             "input": list_files(OPTI_INPUT_DIR),
             "output": list_files(OPTI_OUTPUT_DIR),
+        },
+        "Generate Mooring Report": {
+            "input": list_files(REPORT_INPUT_DIR),
+            "output": list_files(REPORT_OUTPUT_DIR),
         },
     }
 
@@ -198,6 +217,52 @@ def convert_rtf_to_excel(uploaded_rtf_files) -> list[Path]:
     )
 
     return sorted([p for p in OPTI_OUTPUT_DIR.glob("*.xlsx") if p.is_file()])
+
+
+def generate_mooring_report(
+    input_xlsm,
+    output_xlsx,
+    project_name: str,
+    reference: str,
+    report_date: str,
+    client: str,
+    author: str,
+) -> Path:
+    """Save uploaded Excel files and generate a mooring report .docx."""
+    ensure_task_directories()
+
+    for path in REPORT_INPUT_DIR.glob("*"):
+        if path.is_file():
+            path.unlink(missing_ok=True)
+    for path in REPORT_OUTPUT_DIR.glob("*.docx"):
+        path.unlink(missing_ok=True)
+
+    input_path = REPORT_INPUT_DIR / input_xlsm.name
+    output_path = REPORT_INPUT_DIR / output_xlsx.name
+    input_bytes = input_xlsm.getvalue()
+    output_bytes = output_xlsx.getvalue()
+    input_path.write_bytes(input_bytes)
+    output_path.write_bytes(output_bytes)
+
+    vessel_stub = sanitize_filename(input_path.stem)
+    save_path = REPORT_OUTPUT_DIR / f"Mooring_Report_{vessel_stub}.docx"
+
+    metadata = report_gen.ReportMetadata(
+        project_name=project_name,
+        reference=reference,
+        report_date=report_date,
+        client=client,
+        author=author,
+    )
+
+    report_gen.generate_report(
+        input_path=input_path,
+        output_path=output_path,
+        template_path=REPORT_TEMPLATE_PATH,
+        save_path=save_path,
+        metadata=metadata,
+    )
+    return save_path
 
 
 def get_chart_title(xls) -> tuple:
@@ -506,7 +571,10 @@ def main():
     
     st.sidebar.markdown("---")
     st.sidebar.header("⚙️ Menu")
-    task = st.sidebar.radio("Select task", ["Rose Chart Maker", "Optimoor RTF to Excel"])
+    task = st.sidebar.radio(
+        "Select task",
+        ["Rose Chart Maker", "Optimoor RTF to Excel", "Generate Mooring Report"],
+    )
     st.sidebar.markdown("---")
 
     if task == "Rose Chart Maker":
@@ -612,7 +680,7 @@ def main():
         )
         st.info(f"Ảnh đã được lưu tại: {out_path}")
 
-    else:
+    elif task == "Optimoor RTF to Excel":
         st.title("🧾 Optimoor RTF to Excel")
         st.caption("Upload .rtf files để chuyển đổi sang Excel.")
 
@@ -663,6 +731,104 @@ def main():
                     st.warning("Không có file .rtf nào được xử lý.")
             else:
                 st.info("Vui lòng upload ít nhất một file .rtf.")
+
+    else:
+        st.title("📝 Generate Mooring Report")
+        st.caption("Upload Optimoor input (.xlsm) và output results (.xlsx) để tạo báo cáo Word.")
+
+        uploaded_input_xlsm = st.sidebar.file_uploader(
+            "Upload OptimoorTool_Input (.xlsm)",
+            type=["xlsm"],
+            help="File master input từ Optimoor Tool.",
+        )
+        uploaded_output_xlsx = st.sidebar.file_uploader(
+            "Upload OutputResult (.xlsx)",
+            type=["xlsx"],
+            help="File kết quả phân tích (từ RTF to Excel hoặc post-processing).",
+        )
+
+        report_template_bytes = get_report_template_bytes()
+        if report_template_bytes:
+            st.sidebar.download_button(
+                label="⬇️ Download sample report (from example data)",
+                data=report_template_bytes,
+                file_name="Mooring_Report_Sample.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        else:
+            st.sidebar.warning("Không tìm thấy file report template.")
+
+        with st.expander("📘 Hướng dẫn sử dụng", expanded=True):
+            st.markdown(
+                """
+                1. Chuẩn bị file **OptimoorTool_Input.xlsm** (số liệu đầu vào) và **OutputResult.xlsx** (kết quả phân tích).
+                2. Upload cả hai file vào sidebar.
+                3. Điền thông tin báo cáo (project, reference, date...) nếu cần.
+                4. Nhấn **Generate Report** để tạo file Word.
+                5. Tải báo cáo .docx từ nút download.
+                """
+            )
+
+        with st.expander("🗂️ Task folder structure", expanded=True):
+            st.markdown(build_task_tree_markdown())
+
+        st.subheader("📋 Report metadata")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            project_name = st.text_input("Project name", value="Gemalink Container Terminal Phase 2")
+            reference = st.text_input("Reference", value="")
+            report_date = st.text_input("Report date", value="")
+        with col_b:
+            client = st.text_input("Client", value="Gemalink International Terminal")
+            author = st.text_input("Author", value="OptimoorTool")
+
+        if st.button("Generate Report", type="primary"):
+            if not uploaded_input_xlsm or not uploaded_output_xlsx:
+                st.warning("Vui lòng upload cả hai file Excel (.xlsm và .xlsx).")
+            else:
+                try:
+                    with st.spinner("Đang tạo báo cáo..."):
+                        report_path = generate_mooring_report(
+                            uploaded_input_xlsm,
+                            uploaded_output_xlsx,
+                            project_name,
+                            reference,
+                            report_date,
+                            client,
+                            author,
+                        )
+                        input_data = report_gen.read_input_workbook(
+                            REPORT_INPUT_DIR / uploaded_input_xlsm.name
+                        )
+                        output_data = report_gen.read_output_workbook(
+                            REPORT_INPUT_DIR / uploaded_output_xlsx.name
+                        )
+                        summary = report_gen.build_summary(input_data, output_data)
+
+                    st.success(f"Đã tạo báo cáo: **{report_path.name}**")
+                    st.info(
+                        "Tải file báo cáo bằng nút **Download** bên dưới (không dùng nút sample ở sidebar). "
+                        f"File được lưu tại: `{report_path}`"
+                    )
+                    st.markdown(
+                        f"""
+                        **KPI Preview**
+                        - Vessel: {summary['vessel_name']}
+                        - Cases: {summary['case_count']}
+                        - Max line utilization: {summary['max_pct_mbl']} (Line {summary['max_pct_line']})
+                        - Max bollard force: {summary['max_bollard_ton']} ton (Bollard {summary['max_bollard_id']})
+                        - Status: **{summary['status']}**
+                        """
+                    )
+                    with open(report_path, "rb") as f:
+                        st.download_button(
+                            label=f"⬇️ Download {report_path.name}",
+                            data=f.read(),
+                            file_name=report_path.name,
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        )
+                except Exception as e:
+                    st.error(f"Không thể tạo báo cáo: {e}")
 
 
 if __name__ == "__main__":
